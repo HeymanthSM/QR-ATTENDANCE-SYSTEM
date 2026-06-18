@@ -55,19 +55,18 @@ def create_app(config_class=Config):
         try:
             admin_exists = Admin.query.first()
             if not admin_exists:
-                from werkzeug.security import generate_password_hash
                 default_user = app.config.get('SEED_ADMIN_USER', 'admin')
                 default_pass = app.config.get('SEED_ADMIN_PASS', 'admin123')
                 
-                hashed_password = generate_password_hash(default_pass)
-                db_admin = Admin(username=default_user, password=hashed_password)
+                db_admin = Admin(username=default_user, email="admin@attendance-system.com")
+                db_admin.set_password(default_pass)
                 db.session.add(db_admin)
                 
                 # Seed default departments
                 if not Department.query.first():
-                    d1 = Department(name="Computer Science")
-                    d2 = Department(name="Information Technology")
-                    d3 = Department(name="Electronics Engineering")
+                    d1 = Department(code="CS", name="Computer Science & Engineering")
+                    d2 = Department(code="IT", name="Information Technology")
+                    d3 = Department(code="ECE", name="Electronics & Communication Engineering")
                     db.session.add_all([d1, d2, d3])
                 
                 db.session.commit()
