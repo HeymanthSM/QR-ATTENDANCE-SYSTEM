@@ -10,7 +10,12 @@ class Config:
     
     # Database Settings: Support both MySQL and fallback to SQLite
     # Example MySQL: mysql+pymysql://username:password@localhost/db_name
-    DEFAULT_DB_PATH = os.path.join(BASE_DIR, 'attendance.db')
+    # Use /tmp folder for SQLite database in serverless read-only environments (Vercel)
+    if os.environ.get('VERCEL') or os.environ.get('AWS_LAMBDA_FUNCTION_NAME'):
+        DEFAULT_DB_PATH = '/tmp/attendance.db'
+    else:
+        DEFAULT_DB_PATH = os.path.join(BASE_DIR, 'attendance.db')
+        
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', f'sqlite:///{DEFAULT_DB_PATH}')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
@@ -18,11 +23,9 @@ class Config:
     UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
     QR_CODE_FOLDER = os.path.join(BASE_DIR, 'static', 'qr_codes')
     
-    # Session Settings
-    SESSION_TYPE = 'filesystem'
+    # Session Settings (Standard Flask signed cookies)
     SESSION_PERMANENT = True
     PERMANENT_SESSION_LIFETIME = timedelta(days=1)
-    SESSION_USE_SIGNER = True
     
     # Email SMTP Settings (Mock config, editable by user)
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
