@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Register Member - ScanFlow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6 col-md-8 animate__animated animate__fadeInUp">
+        <div class="card glass-card p-4">
+            <div class="text-center mb-4">
+                <div class="d-inline-flex bg-primary bg-opacity-10 p-3 rounded-circle text-primary mb-3">
+                    <i class="bi bi-person-plus-fill fs-2"></i>
+                </div>
+                <h3 class="fw-bold mb-1">Register Member</h3>
+                <p class="text-secondary small">Enroll a student or employee and generate a unique QR code</p>
+            </div>
+
+            <form action="{{ url_for('user.register') }}" method="POST">
+                <!-- Name Field -->
+                <div class="mb-3">
+                    <label for="name" class="form-label text-secondary small fw-semibold">Full Name <span class="text-danger">*</span></label>
+                    <input type="text" 
+                           class="form-control form-control-custom" 
+                           id="name" 
+                           name="name" 
+                           placeholder="Enter full name" 
+                           required>
+                </div>
+
+                <!-- ID Code Field -->
+                <div class="mb-3">
+                    <label for="user_code" class="form-label text-secondary small fw-semibold">ID Code (Roll No / Employee ID) <span class="text-danger">*</span></label>
+                    <input type="text" 
+                           class="form-control form-control-custom" 
+                           id="user_code" 
+                           name="user_code" 
+                           placeholder="e.g. STD101, EMP202" 
+                           required>
+                </div>
+
+                <!-- Department Selector -->
+                <div class="mb-3">
+                    <label for="department_id" class="form-label text-secondary small fw-semibold">Department <span class="text-danger">*</span></label>
+                    <select class="form-select form-control-custom" id="department_id" name="department_id" required>
+                        <option value="" disabled selected>Select department</option>
+                        {% if departments %}
+                            {% for dept in departments %}
+                                <option value="{{ dept.id }}">{{ dept.name }} ({{ dept.code }})</option>
+                            {% endfor %}
+                        {% endif %}
+                    </select>
+                    <div class="form-text small mt-1">
+                        Don't see your department? <a href="{{ url_for('department.index') }}" class="text-primary text-decoration-none">Add it here</a>.
+                    </div>
+                </div>
+
+                <!-- Email Field -->
+                <div class="mb-3">
+                    <label for="email" class="form-label text-secondary small fw-semibold">Email Address <span class="text-danger">*</span></label>
+                    <input type="email" 
+                           class="form-control form-control-custom" 
+                           id="email" 
+                           name="email" 
+                           placeholder="name@example.com" 
+                           required>
+                </div>
+
+                <!-- Phone Field (Optional) -->
+                <div class="mb-4">
+                    <label for="phone" class="form-label text-secondary small fw-semibold">Phone Number (Optional)</label>
+                    <input type="tel" 
+                           class="form-control form-control-custom" 
+                           id="phone" 
+                           name="phone" 
+                           placeholder="Enter phone number">
+                </div>
+
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('user.index') }}" class="btn btn-outline-secondary rounded-pill w-50 py-2">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary-custom w-50 py-2">
+                        <i class="bi bi-qr-code me-1"></i> Register & Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

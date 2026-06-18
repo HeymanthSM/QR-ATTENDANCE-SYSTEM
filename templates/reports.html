@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance Reports & Analytics - ScanFlow{% endblock %}
+
+{% block head %}
+<!-- Chart.js Library CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<!-- Analytics Charts Section -->
+<div class="row g-4 mb-4">
+    <!-- Trend Chart -->
+    <div class="col-lg-8 animate__animated animate__fadeInLeft">
+        <div class="card glass-card p-4 h-100">
+            <h5 class="fw-bold mb-1">Attendance Trend</h5>
+            <p class="text-secondary small mb-3">Daily check-in counts for the last 7 active days</p>
+            <div style="position: relative; height: 300px; width: 100%;">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Department Distribution Chart -->
+    <div class="col-lg-4 animate__animated animate__fadeInRight">
+        <div class="card glass-card p-4 h-100">
+            <h5 class="fw-bold mb-1">Department Presence</h5>
+            <p class="text-secondary small mb-3">Today's present counts by department</p>
+            <div style="position: relative; height: 300px; width: 100%;">
+                <canvas id="deptChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reports & Exports Panel -->
+<div class="card glass-card p-4 animate__animated animate__fadeInUp">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">Attendance Reports</h4>
+            <p class="text-secondary small mb-0">Filter historical data and download reports</p>
+        </div>
+        
+        <!-- Export Actions -->
+        {% if logs %}
+        <div class="d-inline-flex gap-2">
+            <a href="{{ url_for('reports.export', format_type='excel', type=report_type, start_date=start_date, end_date=end_date, department_id=selected_dept) }}" class="btn btn-success rounded-pill px-3 py-2 small">
+                <i class="bi bi-file-earmark-excel-fill me-1"></i> Export to Excel
+            </a>
+            <a href="{{ url_for('reports.export', format_type='csv', type=report_type, start_date=start_date, end_date=end_date, department_id=selected_dept) }}" class="btn btn-outline-success rounded-pill px-3 py-2 small">
+                <i class="bi bi-file-earmark-spreadsheet-fill me-1"></i> Export to CSV
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Query Filters Form -->
+    <form action="{{ url_for('reports.index') }}" method="GET" class="row g-3 mb-4" id="filter-form">
+        <!-- Preset Date Filters -->
+        <div class="col-md-3">
+            <label class="form-label text-secondary small fw-semibold">Report Period</label>
+            <select class="form-select form-control-custom" name="type" id="period-selector" onchange="toggleCustomDates()">
+                <option value="daily" {% if report_type == 'daily' %}selected{% endif %}>Daily (Today)</option>
+                <option value="weekly" {% if report_type == 'weekly' %}selected{% endif %}>Weekly (This Week)</option>
+                <option value="monthly" {% if report_type == 'monthly' %}selected{% endif %}>Monthly (This Month)</option>
+                <option value="custom" {% if report_type == 'custom' %}selected{% endif %}>Custom Date Range</option>
+            </select>
+        </div>
+
+        <!-- Custom Date Fields -->
+        <div class="col-md-3 date-field {% if report_type != 'custom' %}d-none{% endif %}">
+            <label class="form-label text-secondary small fw-semibold">From Date</label>
+            <input type="date" class="form-control form-control-custom" name="start_date" id="start_date" value="{{ start_date }}">
+        </div>
+        <div class="col-md-3 date-field {% if report_type != 'custom' %}d-none{% endif %}">
+            <label class="form-label text-secondary small fw-semibold">To Date</label>
+            <input type="date" class="form-control form-control-custom" name="end_date" id="end_date" value="{{ end_date }}">
+        </div>
+
+        <!-- Department Filter -->
+        <div class="col-md-3">
+            <label class="form-label text-secondary small fw-semibold">Department</label>
+            <select class="form-select form-control-custom" name="department_id">
+                <option value="">All Departments</option>
+                {% if departments %}
+                    {% for dept in departments %}
+                        <option value="{{ dept.id }}" {% if selected_dept|string == dept.id|string %}selected{% endif %}>{{ dept.name }}</option>
+                    {% endfor %}
+                {% endif %}
+            </select>
+        </div>
+
+        <!-- Filter Submit -->
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary-custom w-100 py-2">
+                <i class="bi bi-search me-1"></i> Search Records
+            </button>
+        </div>
+    </form>
+
+    <!-- Table of Results -->
+    <div class="table-responsive">
+        <table class="table table-custom align-middle">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>ID Code</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if logs %}
+                    {% for log in logs %}
+                        <tr>
+                            <td class="fw-bold">{{ log.date.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <i class="bi bi-clock text-secondary me-1"></i> {{ log.time.strftime('%I:%M %p') }}
+                            </td>
+                            <td><span class="font-monospace fw-semibold">{{ log.user.user_code }}</span></td>
+                            <td>{{ log.user.name }}</td>
+                            <td>{{ log.user.department.name }}</td>
+                            <td>
+                                {% if log.status == 'Present' %}
+                                    <span class="badge-present"><i class="bi bi-check-circle-fill me-1"></i> Present</span>
+                                {% elif log.status == 'Late' %}
+                                    <span class="badge-late"><i class="bi bi-exclamation-triangle-fill me-1"></i> Late</span>
+                                {% else %}
+                                    <span class="badge-absent"><i class="bi bi-x-circle-fill me-1"></i> Absent</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-secondary">
+                            <div class="fs-1 text-opacity-25 text-secondary"><i class="bi bi-file-earmark-x"></i></div>
+                            <h5 class="mt-2">No Records Found</h5>
+                            <p class="small text-muted">Try modifying your period filters or date range.</p>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Toggle date input fields visibility
+    function toggleCustomDates() {
+        const selector = document.getElementById('period-selector');
+        const dateFields = document.querySelectorAll('.date-field');
+        
+        if (selector.value === 'custom') {
+            dateFields.forEach(f => f.classList.remove('d-none'));
+        } else {
+            dateFields.forEach(f => f.classList.add('d-none'));
+        }
+    }
+</script>
+<!-- Include Charts.js rendering script -->
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+{% endblock %}

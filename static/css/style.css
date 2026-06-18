@@ -1,0 +1,328 @@
+/* Import Inter Font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* CSS variables for variables & theme customisation */
+:root {
+    --font-primary: 'Inter', sans-serif;
+    
+    /* Light Mode Palette */
+    --bg-primary: #f8f9fc;
+    --bg-secondary: #ffffff;
+    --bg-card: rgba(255, 255, 255, 0.85);
+    --border-color: rgba(226, 232, 240, 0.8);
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --primary-color: #6366f1; /* Indigo */
+    --primary-hover: #4f46e5;
+    --accent-color: #06b6d4;  /* Cyan */
+    --success-color: #10b981; /* Emerald Green */
+    --warning-color: #f59e0b; /* Amber */
+    --danger-color: #ef4444;  /* Rose Red */
+    
+    --card-shadow: 0 4px 20px -2px rgba(50, 50, 93, 0.08), 0 2px 8px -1px rgba(0, 0, 0, 0.04);
+    --glass-blur: blur(8px);
+}
+
+[data-theme="dark"] {
+    /* Dark Mode Palette */
+    --bg-primary: #0f172a; /* Slate 900 */
+    --bg-secondary: #1e293b; /* Slate 800 */
+    --bg-card: rgba(30, 41, 59, 0.75);
+    --border-color: rgba(255, 255, 255, 0.08);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --primary-color: #818cf8; /* Lighter Indigo */
+    --primary-hover: #6366f1;
+    --accent-color: #22d3ee;  /* Lighter Cyan */
+    
+    --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    --glass-blur: blur(12px);
+}
+
+/* Global Reset & Base Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-primary);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Navbar Customisation */
+.navbar-custom {
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.navbar-brand {
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: color 0.2s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--primary-color) !important;
+}
+
+/* Glassmorphism Card Styling */
+.glass-card {
+    background: var(--bg-card);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.12);
+}
+
+/* KPI Counter Dashboard Cards */
+.kpi-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+}
+
+.kpi-total::before { background-color: var(--primary-color); }
+.kpi-present::before { background-color: var(--success-color); }
+.kpi-percentage::before { background-color: var(--accent-color); }
+
+.kpi-icon {
+    font-size: 2.2rem;
+    opacity: 0.85;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Quick Scanner Layout */
+#reader {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    border: none !important;
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+}
+
+#reader__scan_region {
+    background: #000;
+    min-height: 250px;
+}
+
+/* Custom Scanner Overlay lines */
+.scanner-container {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+/* Custom Styled Buttons */
+.btn-primary-custom {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    border: none;
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 10px 24px;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+    transition: all 0.2s ease;
+}
+
+.btn-primary-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+    background: linear-gradient(135deg, var(--primary-hover), var(--primary-color));
+    color: #ffffff;
+}
+
+/* Form Styles */
+.form-control-custom {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px;
+    color: var(--text-primary) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control-custom:focus {
+    background-color: var(--bg-secondary);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    outline: none;
+}
+
+/* Tables Styling */
+.table-custom {
+    background-color: transparent !important;
+}
+
+.table-custom th {
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border-color) !important;
+    padding: 16px 24px;
+}
+
+.table-custom td {
+    padding: 16px 24px;
+    vertical-align: middle;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table-custom tr {
+    transition: background-color 0.2s ease;
+}
+
+.table-custom tr:hover {
+    background-color: rgba(99, 102, 241, 0.04);
+}
+
+/* Badge Layouts */
+.badge-present {
+    background-color: rgba(16, 185, 129, 0.12);
+    color: var(--success-color);
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.badge-late {
+    background-color: rgba(245, 158, 11, 0.12);
+    color: var(--warning-color);
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.badge-absent {
+    background-color: rgba(239, 68, 68, 0.12);
+    color: var(--danger-color);
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+/* QR Code Preview Frame */
+.qr-preview-container {
+    text-align: center;
+    border: 2px dashed var(--border-color);
+    border-radius: 16px;
+    padding: 30px;
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="dark"] .qr-preview-container {
+    background-color: rgba(255, 255, 255, 0.01);
+}
+
+.qr-code-img {
+    max-width: 200px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    background-color: white; /* Ensure white background even in dark mode for QR reader readability */
+    padding: 10px;
+}
+
+/* Login Page Styling */
+.login-bg {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.15) 0%, transparent 40%);
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    border-radius: 24px;
+    padding: 40px;
+}
+
+/* Theme Switcher Toggle styling */
+.theme-switch-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.theme-switch-btn {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.theme-switch-btn:hover {
+    background-color: rgba(99, 102, 241, 0.08);
+    color: var(--primary-color);
+}
+
+/* Floating Alerts / Notifications */
+.alert-container {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 1080;
+    max-width: 380px;
+}
+
+.custom-alert {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    backdrop-filter: var(--glass-blur);
+    background-color: var(--bg-card);
+}
+
+/* Footer layout */
+footer {
+    margin-top: auto;
+    background-color: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 20px 0;
+    font-size: 0.875rem;
+}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Scan QR Attendance - ScanFlow{% endblock %}
+
+{% block head %}
+<!-- html5-qrcode scanner client library CDN -->
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8 animate__animated animate__fadeInUp">
+        <div class="card glass-card p-4 text-center">
+            <div class="mb-3">
+                <div class="d-inline-flex bg-primary bg-opacity-10 p-3 rounded-circle text-primary mb-2">
+                    <i class="bi bi-qr-code-scan fs-2"></i>
+                </div>
+                <h3 class="fw-bold mb-1">QR Attendance Scanner</h3>
+                <p class="text-secondary small">Position the generated QR code badge in front of the camera lens</p>
+            </div>
+
+            <!-- Webcam View Reader Frame -->
+            <div class="scanner-container my-4">
+                <div id="reader"></div>
+            </div>
+
+            <!-- Scanner Controls -->
+            <div class="mb-2">
+                <button class="btn btn-primary-custom px-5 py-3 fs-5" id="start-scanner-btn">
+                    <i class="bi bi-play-circle-fill me-2"></i> Start Webcam Scanner
+                </button>
+                <button class="btn btn-danger rounded-pill px-5 py-3 fs-5 d-none" id="stop-scanner-btn">
+                    <i class="bi bi-stop-circle-fill me-2"></i> Stop Scanner
+                </button>
+            </div>
+            
+            <p class="text-muted small mt-3">
+                <i class="bi bi-info-circle me-1"></i> Ensure you have authorized browser camera access permissions.
+            </p>
+
+            <!-- Dynamic Scan Result Toast Panel -->
+            <div class="card glass-card d-none mt-4 text-start shadow-lg" id="scan-result-card">
+                <div class="card-body" id="scan-result-body">
+                    <!-- Javascript populates scan result success/error alerts dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Custom Scanner scripts execution -->
+<script src="{{ url_for('static', filename='js/scanner.js') }}"></script>
+{% endblock %}

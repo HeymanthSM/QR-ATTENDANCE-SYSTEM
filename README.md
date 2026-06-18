@@ -1,0 +1,246 @@
+# ScanFlow: QR Code Attendance Management System
+
+ScanFlow is a complete, production-ready QR Code Attendance Management System built with Python Flask and SQLAlchemy on the backend, and Bootstrap 5 and modern Vanilla JavaScript on the frontend. It supports two modes of QR scanning: browser-based (via webcam/mobile camera using `html5-qrcode`) and local desktop-based (via OpenCV).
+
+---
+
+## Features
+
+- **Secure Authentication**: Admin login with session management and password hashing.
+- **Dynamic Dashboard**: Displays real-time KPIs (Total Users, Present Today, Presence Rate) and today's stream of attendance logs with instant search filtering.
+- **Registration Module**: Enrolls students/employees, automatically generates high-resolution QR codes, and stores them in the local folder structure.
+- **Double Scanning Guard**: Backend checks prevent duplicate attendance submissions for the same user on the same calendar day.
+- **Attendance Scanner**:
+  - **Browser Webcam Scanner**: Built-in webcam scanning utilizing `html5-qrcode` directly inside the browser, complete with pleasant audio feedback (Web Audio API) and animations.
+  - **Desktop OpenCV Scanner**: A client script (`scan_cli.py`) that opens the local desktop camera, decodes QR badges, displays live overlays (Access Granted/Denied banner), plays beep indicators, and syncs directly with the central web service.
+- **Custom Reports & Analytics**:
+  - Date-period statistics (Daily, Weekly, Monthly, and Custom Date Range) filtered by department.
+  - One-click export options to downloadable **Excel (XLSX)** and **CSV** files.
+  - Chart.js visual trends showing daily counts and department distribution.
+- **Dark Mode Support**: A glassmorphic design theme with light/dark toggling, updating dashboard UI, custom table elements, and active chart styles reactively.
+
+---
+
+## Folder Structure
+
+The project directory structure is laid out as follows:
+
+```
+d:/QR-Attendance-System/
+├── app.py                   # Main Flask Application Entry Point
+├── config.py                # Configuration Settings (DB URI, uploads, SMTP details)
+├── requirements.txt         # Package Dependencies
+├── seed.py                  # Database Seeder (sets up initial admin, depts, & historical logs)
+├── scan_cli.py              # OpenCV Desktop Webcam Scanner Utility
+├── database/
+│   └── connection.py        # SQLAlchemy db instance declaration
+├── models/                  # SQLAlchemy ORM Database Models
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── department.py
+│   ├── user.py
+│   └── attendance.py
+├── routes/                  # Modular Blueprint Route Handlers
+│   ├── auth.py
+│   ├── department.py
+│   ├── user.py
+│   ├── attendance.py
+│   ├── reports.py
+│   └── dashboard.py
+├── static/                  # Shared Static Assets
+│   ├── css/
+│   │   └── style.css        # Core stylesheet (Glassmorphic variables, dark mode styling)
+│   ├── js/
+│   │   ├── main.js          # Shared state (theme toggle, self-closing alerts)
+│   │   ├── scanner.js       # html5-qrcode browser loop handler
+│   │   └── charts.js        # Analytics charts config
+│   ├── qr_codes/            # Saved user QR codes (.png)
+│   └── uploads/             # Profile pictures
+└── templates/               # Jinja2 HTML Layouts
+    ├── base.html
+    ├── login.html
+    ├── dashboard.html
+    ├── register.html
+    ├── users.html
+    ├── departments.html
+    ├── scan.html
+    ├── profile.html
+    └── reports.html
+```
+
+---
+
+## Setup & Running Guide
+
+Follow these steps to run the application on your local system:
+
+### 1. Requirements Installation
+Ensure you have Python 3.11+ installed. Create a virtual environment and install the required dependencies:
+
+```bash
+# Navigate to workspace
+cd d:/QR-Attendance-System
+
+# Create virtual environment
+python -m venv .venv
+
+# Activate virtual environment
+# On Windows Powershell:
+.venv\Scripts\Activate.ps1
+# On Windows Command Prompt:
+.venv\Scripts\activate.bat
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### 2. Configure Environment (Optional)
+By default, the application runs on a local SQLite database (`attendance.db` created in the workspace).
+If you wish to configure a **MySQL** database or set SMTP variables, define them as environment variables (or add them inside `config.py`):
+```bash
+# Example MySQL configuration (PowerShell):
+$env:DATABASE_URL="mysql+pymysql://root:password@localhost/attendance_db"
+```
+
+### 3. Initialize & Seed Database
+Run the seeder script. This will drop old tables, recreate the schema, clear out outdated QR codes, and populate test departments, users, and 7-day historical attendance statistics:
+
+```bash
+python seed.py
+```
+
+*Default Admin Login Credentials generated by seeder:*
+- **Username**: `admin`
+- **Password**: `admin123`
+
+### 4. Launch the Web Application
+Start the Flask server:
+
+```bash
+python app.py
+```
+
+Open your browser and navigate to **`http://127.0.0.1:5000`**. You will be redirected to the Admin login screen.
+
+### 5. Launch the Desktop OpenCV Scanner Client
+To use a local camera from your desktop CLI instead of the web browser, launch the helper client in a separate terminal window:
+
+```bash
+# Ensure virtual environment is activated
+python scan_cli.py
+```
+*Note: Press `q` in the camera frame window to exit the OpenCV scanner.*
+
+---
+
+## Database Schema
+
+```mermaid
+erDiagram
+    ADMIN {
+        int id PK
+        string username
+        string password_hash
+        string email
+        datetime created_at
+    }
+    DEPARTMENT {
+        int id PK
+        string code
+        string name
+        datetime created_at
+    }
+    USER {
+        int id PK
+        string user_code
+        string name
+        string email
+        string phone
+        int department_id FK
+        string qr_code_path
+        datetime created_at
+    }
+    ATTENDANCE {
+        int id PK
+        int user_id FK
+        date date
+        time time
+        string status
+    }
+    
+    DEPARTMENT ||--o{ USER : "groups"
+    USER ||--o{ ATTENDANCE : "logs"
+```
+
+---
+
+## API Documentation
+
+### 1. Admin Login
+- **Endpoint**: `/login`
+- **Method**: `POST`
+- **Payload**: `username`, `password` (Form data)
+- **Response**: Redirects to `/dashboard` on success.
+
+### 2. Register User
+- **Endpoint**: `/users/register`
+- **Method**: `POST`
+- **Payload**: `user_code`, `name`, `email`, `phone`, `department_id` (Form data)
+- **Response**: Creates database entry, saves QR Code in `static/qr_codes/<user_code>.png`, and redirects to Users directory.
+
+### 3. Mark Attendance
+- **Endpoint**: `/attendance/mark`
+- **Method**: `POST`
+- **Payload**: JSON
+  ```json
+  {
+    "user_code": "STD101"
+  }
+  ```
+- **Responses**:
+  - `200 OK` (Attendance Logged):
+    ```json
+    {
+      "success": true,
+      "message": "Attendance marked successfully!",
+      "data": {
+        "user_code": "STD101",
+        "name": "Alice Johnson",
+        "department": "Computer Science & Engineering",
+        "date": "2026-06-18",
+        "time": "09:15 AM",
+        "status": "Present"
+      }
+    }
+    ```
+  - `400 Bad Request` (Duplicate scanning context):
+    ```json
+    {
+      "success": false,
+      "message": "Attendance already marked today for Alice Johnson (STD101) at 09:15 AM."
+    }
+    ```
+  - `404 Not Found` (Unregistered QR code badge):
+    ```json
+    {
+      "success": false,
+      "message": "No registered user found for code \"STD999\"."
+    }
+    ```
+
+### 4. Fetch Analytics Data
+- **Endpoint**: `/reports/api/analytics`
+- **Method**: `GET`
+- **Response**: JSON dataset powering UI charts.
+  ```json
+  {
+    "trend": {
+      "labels": ["Jun 12", "Jun 13", "Jun 14", "Jun 15", "Jun 16", "Jun 17", "Jun 18"],
+      "data": [4, 3, 2, 2, 5, 0, 0]
+    },
+    "departments": {
+      "labels": ["CS", "ECE", "IT", "ME", "CIVIL"],
+      "data": [0, 0, 0, 0, 0]
+    }
+  }
+  ```

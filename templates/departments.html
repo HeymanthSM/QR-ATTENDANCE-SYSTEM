@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Departments Management - ScanFlow{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Add Department Form -->
+    <div class="col-lg-4 animate__animated animate__fadeInLeft">
+        <div class="card glass-card p-4">
+            <h4 class="fw-bold mb-3">Add Department</h4>
+            <p class="text-secondary small mb-4">Create structural departments for grouping users</p>
+            
+            <form action="{{ url_for('department.index') }}" method="POST">
+                <div class="mb-3">
+                    <label for="code" class="form-label text-secondary small fw-semibold">Department Code <span class="text-danger">*</span></label>
+                    <input type="text" 
+                           class="form-control form-control-custom text-uppercase" 
+                           id="code" 
+                           name="code" 
+                           placeholder="e.g. CS, ME, ECE" 
+                           required>
+                    <div class="form-text small">Short alphanumeric code (unique ID)</div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="name" class="form-label text-secondary small fw-semibold">Department Name <span class="text-danger">*</span></label>
+                    <input type="text" 
+                           class="form-control form-control-custom" 
+                           id="name" 
+                           name="name" 
+                           placeholder="e.g. Computer Science" 
+                           required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary-custom w-100 py-2">
+                    <i class="bi bi-plus-circle me-1"></i> Add Department
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Departments Directory Table -->
+    <div class="col-lg-8 animate__animated animate__fadeInRight">
+        <div class="card glass-card p-4 h-100">
+            <h4 class="fw-bold mb-1">Departments Directory</h4>
+            <p class="text-secondary small mb-4">Manage registered corporate/academic departments</p>
+            
+            <div class="table-responsive">
+                <table class="table table-custom align-middle">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Total Members</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if departments %}
+                            {% for dept in departments %}
+                                <tr>
+                                    <td><span class="badge bg-primary px-3 py-2 font-monospace">{{ dept.code }}</span></td>
+                                    <td><span class="fw-bold">{{ dept.name }}</span></td>
+                                    <td>
+                                        <i class="bi bi-people text-secondary me-1"></i> {{ dept.users | length }} members
+                                    </td>
+                                    <td class="text-end">
+                                        <form action="{{ url_for('department.delete', dept_id=dept.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete department &quot;{{ dept.name }}&quot;? This will remove all users registered in this department.');">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                                <i class="bi bi-trash-fill me-1"></i> Delete
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-secondary">
+                                    <div class="fs-1 text-opacity-25 text-secondary"><i class="bi bi-building"></i></div>
+                                    <h5 class="mt-2">No Departments Registered</h5>
+                                    <p class="small text-muted">Create a department using the left panel.</p>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

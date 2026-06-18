@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login - ScanFlow{% endblock %}
+
+{% block content %}
+<div class="login-bg mt-n4">
+    <div class="card glass-card login-card animate__animated animate__fadeInUp">
+        <div class="text-center mb-4">
+            <div class="d-inline-flex bg-primary bg-opacity-10 p-3 rounded-circle text-primary mb-3">
+                <i class="bi bi-shield-lock-fill fs-1"></i>
+            </div>
+            <h3 class="fw-bold mb-1">Welcome Back</h3>
+            <p class="text-secondary small">Access the Admin Control Panel</p>
+        </div>
+        
+        <form action="{{ url_for('auth.login') }}" method="POST">
+            <div class="mb-3">
+                <label for="username" class="form-label text-secondary small fw-semibold">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text border-end-0 bg-transparent text-secondary" style="border-radius: 10px 0 0 10px; border-color: var(--border-color);">
+                        <i class="bi bi-person-fill"></i>
+                    </span>
+                    <input type="text" 
+                           class="form-control form-control-custom border-start-0" 
+                           id="username" 
+                           name="username" 
+                           placeholder="Enter username" 
+                           style="border-radius: 0 10px 10px 0;" 
+                           required>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label for="password" class="form-label text-secondary small fw-semibold">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text border-end-0 bg-transparent text-secondary" style="border-radius: 10px 0 0 10px; border-color: var(--border-color);">
+                        <i class="bi bi-key-fill"></i>
+                    </span>
+                    <input type="password" 
+                           class="form-control form-control-custom border-start-0" 
+                           id="password" 
+                           name="password" 
+                           placeholder="Enter password" 
+                           style="border-radius: 0 10px 10px 0;" 
+                           required>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary-custom w-100 py-3 mt-2">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
