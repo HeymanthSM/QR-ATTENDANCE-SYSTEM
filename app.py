@@ -56,7 +56,8 @@ def create_app(config_class=Config):
 
     return app
 
+app = create_app()
+
 if __name__ == '__main__':
-    app = create_app()
     # Bind to all interfaces (useful if testing from mobile camera on local network!)
     app.run(host='0.0.0.0', port=5000, debug=True)

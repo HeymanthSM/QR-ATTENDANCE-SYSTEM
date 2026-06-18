@@ -1,4 +1,5 @@
 import os
+import io
 import qrcode
 from flask import Blueprint, render_template, request, redirect, url_for, flash, send_from_directory, current_app, send_file
 from models.user import User
@@ -94,7 +95,10 @@ def register():
             db.session.commit()
             
             # Save the image only after db commit success
-            img.save(qr_filepath)
+            try:
+                img.save(qr_filepath)
+            except OSError as e:
+                current_app.logger.warning(f"Could not save QR code file to disk: {e}. Serving dynamically.")
             
             flash(f'User "{name}" registered and QR code generated successfully!', 'success')
             return redirect(url_for('user.index'))
@@ -126,16 +130,55 @@ def profile(user_id):
 @login_required
 def download_qr(user_id):
     user = User.query.get_or_404(user_id)
-    if not user.qr_code_path:
-        flash('QR Code not generated for this user.', 'danger')
-        return redirect(url_for('user.index'))
     
-    # Construct full path to QR Code
+    # Construct full path to QR Code if available
     base_dir = current_app.config['BASE_DIR']
-    full_path = os.path.join(base_dir, user.qr_code_path.replace('/', os.sep))
+    full_path = os.path.join(base_dir, user.qr_code_path.replace('/', os.sep)) if user.qr_code_path else None
     
-    if os.path.exists(full_path):
+    if full_path and os.path.exists(full_path):
         return send_file(full_path, as_attachment=True, download_name=f"{user.user_code}_qrcode.png")
-    else:
-        flash('QR Code image file not found on disk.', 'danger')
-        return redirect(url_for('user.index'))
+    
+    # Fallback to dynamic creation in-memory if physical file not present (e.g. Serverless Vercel)
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(user.user_code)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    
+    buf = io.BytesIO()
+    img.save(buf, format='PNG')
+    buf.seek(0)
+    return send_file(buf, as_attachment=True, download_name=f"{user.user_code}_qrcode.png", mimetype='image/png')
+
+@user_bp.route('/qr/<user_code>')
+@login_required
+def get_qr_code(user_code):
+    user = User.query.filter_by(user_code=user_code).first_or_404()
+    
+    # Try static file first
+    qr_dir = current_app.config['QR_CODE_FOLDER']
+    qr_filename = f"{user_code}.png"
+    qr_filepath = os.path.join(qr_dir, qr_filename)
+    
+    if os.path.exists(qr_filepath):
+        return send_file(qr_filepath, mimetype='image/png')
+        
+    # Create in memory if static file doesn't exist
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(user_code)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    
+    buf = io.BytesIO()
+    img.save(buf, format='PNG')
+    buf.seek(0)
+    return send_file(buf, mimetype='image/png')

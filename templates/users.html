@@ -92,7 +92,7 @@
                                             data-bs-target="#qrModal" 
                                             data-name="{{ user.name }}" 
                                             data-code="{{ user.user_code }}" 
-                                            data-qr="{{ url_for('static', filename='qr_codes/' + user.user_code + '.png') }}">
+                                            data-qr="{{ url_for('user.get_qr_code', user_code=user.user_code) }}">
                                         <i class="bi bi-qr-code me-1 fs-5"></i> View QR
                                     </button>
                                 {% else %}
